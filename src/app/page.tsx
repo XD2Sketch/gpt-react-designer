@@ -5,12 +5,20 @@ import { Editor } from '@monaco-editor/react';
 import { transform } from '@babel/standalone';
 
 const App = () => {
-  const [code, setCode] = useState<string>('const Hello = () => <h1>Hello world</h1>;');
+  const [code, setCode] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleEditorChange = (value: string | undefined) => {
     setCode(value ?? 'Something went wrong');
   };
+
+  useEffect(() => {
+    fetch('/input.tsx')
+      .then((response) => response.text())
+      .then((data) => {
+        setCode(data);
+      });
+  }, []);
 
   const handleRun = () => {
     try {
