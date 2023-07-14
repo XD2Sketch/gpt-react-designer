@@ -1,24 +1,40 @@
 'use client';
 
-import { FC, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { transform } from '@babel/standalone';
+import { Preview } from '@/components/Preview';
+import { useChat } from 'ai/react';
+
+const createPrompt = () => {
+  return `Can you please provide me with a React function component? It is also important that you don't import anything. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else.`;
+};
+
+const removeCodeBlockMarkers = (code: string): string => {
+  const markerStart = '```jsx';
+  const markerEnd = '```';
+
+  return code.replace(markerStart, '').replace(markerEnd, '').trim();
+}
 
 const App = () => {
   const [code, setCode] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
+  const { messages, input, handleInputChange, handleSubmit, setInput } = useChat();
 
   const handleEditorChange = (value: string | undefined) => {
     setCode(value ?? 'Something went wrong');
   };
 
   useEffect(() => {
-    fetch('/input.tsx')
-      .then((response) => response.text())
-      .then((data) => {
-        setCode(data);
-      });
-  }, []);
+    setInput(createPrompt())
+  }, [setInput]);
+
+  useEffect(() => {
+    const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
+    if (!lastBotResponse) return;
+    setCode(removeCodeBlockMarkers(lastBotResponse.content));
+  }, [messages]);
 
   const handleRun = () => {
     try {
@@ -30,9 +46,21 @@ const App = () => {
   };
 
   return (
-    <div className="App flex h-screen bg-gray-200">
-      <div className="editor w-1/2 max-h-screen h-full flex flex-col">
-        <div className="flex-grow p-4 bg-[#1e1e1e]">
+    <div className="flex h-screen bg-gray-200">
+      <div className="w-1/2 max-h-screen h-full flex flex-col">
+        <form className="bg-white flex w-full flex-shrink-0" onSubmit={handleSubmit}>
+          <textarea
+            rows={8}
+            className="flex-grow p-4 text-gray-900"
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Ask something..."
+          />
+          <button type="submit" className="bg-blue-500 hover:bg-blue-700 py-2 px-4">
+            Ask GTP-3
+          </button>
+        </form>
+        <div className="flex-grow p-4 bg-[#1e1e1e] overflow-auto">
           <Editor
             height="100%"
             defaultLanguage="javascript"
@@ -41,57 +69,15 @@ const App = () => {
             onChange={handleEditorChange}
           />
         </div>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4" onClick={handleRun}>Run Code</button>
+        <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 flex-shrink-0"
+                onClick={handleRun}>Run Code
+        </button>
       </div>
-      <div className="preview w-1/2">
-        <Preview code={preview} />
+      <div className="w-1/2">
+        <Preview code={preview}/>
       </div>
     </div>
   );
-}
-
-const Preview: FC<{ code: string | null }> = ({ code }) => {
-  const iframe = useRef<HTMLIFrameElement | null>(null);
-
-  useEffect(() => {
-    if (!iframe.current) return;
-
-    const html = `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
-          <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-          <style>body { background: #fff; margin: 0; overflow: hidden; }</style>
-        </head>
-        <body>
-          <div id="root"></div>
-          <script type="text/javascript">${code || ''}</script>
-          <script type="text/javascript">ReactDOM.render(React.createElement(Hello), document.getElementById('root'));</script>
-        </body>
-      </html>
-    `;
-
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-
-    iframe.current.src = url;
-
-    return () => {
-      URL.revokeObjectURL(url);
-    }
-  }, [code]);
-
-  return (
-    <iframe
-      title="preview"
-      ref={iframe}
-      sandbox="allow-scripts"
-      width="100%"
-      height="100%"
-    />
-  );
-}
-
+};
 
 export default App;
