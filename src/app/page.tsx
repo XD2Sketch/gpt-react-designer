@@ -7,7 +7,7 @@ import { Preview } from '@/components/Preview';
 import { useChat } from 'ai/react';
 
 const createPrompt = (description: string) => {
-  return `Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
+  return `Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code as JSX, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
 const extractJSXContent = (input: string) => {
@@ -44,6 +44,7 @@ const App = () => {
   useEffect(() => {
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
+    console.log('xxx')
     setCode(extractJSXContent(lastBotResponse.content));
   }, [messages]);
 
