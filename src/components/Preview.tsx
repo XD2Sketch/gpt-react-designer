@@ -16,7 +16,7 @@ export const Preview: FC<{ code: string | null }> = ({ code }) => {
           <style>body { background: #fff; margin: 0; overflow: hidden; }</style>
         </head>
         <body>
-          <div id="root"></div>
+          <div id="root" style="padding: 16px;"></div>
           <script type="text/javascript">${code || ''}</script>
           <script type="text/javascript">ReactDOM.render(React.createElement(Hello), document.getElementById('root'));</script>
         </body>
