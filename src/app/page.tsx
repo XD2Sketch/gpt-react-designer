@@ -11,17 +11,27 @@ const createPrompt = (description: string) => {
 };
 
 const extractJSXContent = (input: string) => {
-  const startTag = '```jsx';
+  const startTagJSX = '```jsx';
+  const startTag = '```';
   const endTag = '```';
 
+  const startIndexJSX = input.indexOf(startTagJSX);
   const startIndex = input.indexOf(startTag);
-  const endIndex = input.indexOf(endTag, startIndex + startTag.length);
 
-  if (startIndex === -1 || endIndex === -1) {
+  // If both tags are found, take the one that appears first
+  const actualStartIndex = (startIndex !== -1 && startIndexJSX !== -1)
+    ? Math.min(startIndex, startIndexJSX)
+    : Math.max(startIndex, startIndexJSX);
+
+  const actualStartTag = actualStartIndex === startIndex ? startTag : startTagJSX;
+
+  const endIndex = input.indexOf(endTag, actualStartIndex + actualStartTag.length);
+
+  if (actualStartIndex === -1 || endIndex === -1) {
     return input;
   }
 
-  const contentStartIndex = startIndex + startTag.length;
+  const contentStartIndex = actualStartIndex + actualStartTag.length;
   const extractedContent = input.substring(contentStartIndex, endIndex);
 
   return extractedContent.trim();
