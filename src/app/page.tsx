@@ -57,7 +57,6 @@ const App = () => {
     setCodeFinished(false);
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
-    console.log(lastBotResponse.content)
     setCode(formatResponse(lastBotResponse.content));
   }, [messages]);
 
