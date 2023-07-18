@@ -5,9 +5,10 @@ import { Editor } from '@monaco-editor/react';
 import { transform } from '@babel/standalone';
 import { Preview } from '@/components/Preview';
 import { useChat } from 'ai/react';
+import { set } from 'zod';
 
-const createPrompt = () => {
-  return `Can you please provide me with a React function component? It is also important that you don't import anything. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else.`;
+const createPrompt = (description: string) => {
+  return `Can you please provide me with a React function component? It is also important that you don't import anything. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
 const removeCodeBlockMarkers = (code: string): string => {
@@ -20,15 +21,16 @@ const removeCodeBlockMarkers = (code: string): string => {
 const App = () => {
   const [code, setCode] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, setInput } = useChat();
+  const { messages, handleSubmit, setInput } = useChat();
+  const [simpleInput, setSimpleInput] = useState('');
+
+  useEffect(() => {
+    setInput(createPrompt(simpleInput));
+  }, [setInput, simpleInput])
 
   const handleEditorChange = (value: string | undefined) => {
     setCode(value ?? 'Something went wrong');
   };
-
-  useEffect(() => {
-    setInput(createPrompt())
-  }, [setInput]);
 
   useEffect(() => {
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
@@ -49,11 +51,10 @@ const App = () => {
     <div className="flex h-screen bg-gray-200">
       <div className="w-1/2 max-h-screen h-full flex flex-col">
         <form className="bg-white flex w-full flex-shrink-0" onSubmit={handleSubmit}>
-          <textarea
-            rows={8}
+          <input
             className="flex-grow p-4 text-gray-900"
-            value={input}
-            onChange={handleInputChange}
+            value={simpleInput}
+            onChange={(e) => setSimpleInput(e.target.value)}
             placeholder="Ask something..."
           />
           <button type="submit" className="bg-blue-500 hover:bg-blue-700 py-2 px-4">
