@@ -19,9 +19,7 @@ const extractJSXContent = (input: string) => {
   const startIndex = input.indexOf(startTag);
 
   // If both tags are found, take the one that appears first
-  const actualStartIndex = (startIndex !== -1 && startIndexJSX !== -1)
-    ? Math.min(startIndex, startIndexJSX)
-    : Math.max(startIndex, startIndexJSX);
+  const actualStartIndex = startIndexJSX !== -1 ? startIndexJSX : startIndex;
 
   const actualStartTag = actualStartIndex === startIndex ? startTag : startTagJSX;
 
