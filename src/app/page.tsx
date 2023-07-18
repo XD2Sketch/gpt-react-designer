@@ -1,21 +1,30 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { transform } from '@babel/standalone';
 import { Preview } from '@/components/Preview';
 import { useChat } from 'ai/react';
-import { set } from 'zod';
 
 const createPrompt = (description: string) => {
-  return `Can you please provide me with a React function component? It is also important that you don't import anything. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
+  return `Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. Your output should ONLY be the code, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
-const removeCodeBlockMarkers = (code: string): string => {
-  const markerStart = '```jsx';
-  const markerEnd = '```';
+const extractJSXContent = (input: string) => {
+  const startTag = '```jsx';
+  const endTag = '```';
 
-  return code.replace(markerStart, '').replace(markerEnd, '').trim();
+  const startIndex = input.indexOf(startTag);
+  const endIndex = input.indexOf(endTag, startIndex + startTag.length);
+
+  if (startIndex === -1 || endIndex === -1) {
+    return input;
+  }
+
+  const contentStartIndex = startIndex + startTag.length;
+  const extractedContent = input.substring(contentStartIndex, endIndex);
+
+  return extractedContent.trim();
 }
 
 const App = () => {
@@ -35,7 +44,7 @@ const App = () => {
   useEffect(() => {
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
-    setCode(removeCodeBlockMarkers(lastBotResponse.content));
+    setCode(extractJSXContent(lastBotResponse.content));
   }, [messages]);
 
   const handleRun = () => {
