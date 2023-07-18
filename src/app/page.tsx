@@ -7,7 +7,7 @@ import { Preview } from '@/components/Preview';
 import { useChat } from 'ai/react';
 
 const createPrompt = (description: string) => {
-  return `I want you to act like a code generator and only return code, nothing else. Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. I want you to act like a code generator and only return JSX code, nothing else. For styling you can use TailwindCSS as you can assume that the styles are present.`;
+  return `I want you to act like a code generator and only return JSX code, nothing else. Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
 const extractJSXContent = (input: string) => {
@@ -30,8 +30,9 @@ const extractJSXContent = (input: string) => {
 const App = () => {
   const [code, setCode] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
-  const { messages, handleSubmit, setInput } = useChat();
+  const { messages, handleSubmit, setInput, isLoading } = useChat();
   const [simpleInput, setSimpleInput] = useState('');
+  const [codeFinished, setCodeFinished] = useState(false);
 
   useEffect(() => {
     setInput(createPrompt(simpleInput));
@@ -41,12 +42,6 @@ const App = () => {
     setCode(value ?? 'Something went wrong');
   };
 
-  useEffect(() => {
-    const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
-    if (!lastBotResponse) return;
-    setCode(extractJSXContent(lastBotResponse.content));
-  }, [messages]);
-
   const handleRun = () => {
     try {
       const transformed = transform(code, { presets: ['react'] }).code;
@@ -55,6 +50,21 @@ const App = () => {
       setPreview(`Error: ${err}`);
     }
   };
+
+  useEffect(() => {
+    setCodeFinished(false);
+    const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
+    if (!lastBotResponse) return;
+    setCode(extractJSXContent(lastBotResponse.content));
+  }, [messages]);
+
+  useEffect(() => {
+    if (!codeFinished && !isLoading) {
+      setCodeFinished(true);
+      handleRun();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   return (
     <div className="flex h-screen bg-gray-200">
