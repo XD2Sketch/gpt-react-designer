@@ -18,7 +18,7 @@ export const Preview: FC<{ code: string | null }> = ({ code }) => {
         <body>
           <div id="root" style="padding: 16px;"></div>
           <script type="text/javascript">${code || ''}</script>
-          <script type="text/javascript">ReactDOM.render(React.createElement(Hello), document.getElementById('root'));</script>
+          <script type="text/javascript">ReactDOM.render(React.createElement(MyComponent), document.getElementById('root'));</script>
         </body>
       </html>
     `;

@@ -7,7 +7,7 @@ import { Preview } from '@/components/Preview';
 import { useChat } from 'ai/react';
 
 const createPrompt = (description: string) => {
-  return `I want you to act like a code generator and only return JSX code, nothing else. Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'Hello'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. For styling you can use TailwindCSS as you can assume that the styles are present.`;
+  return `I want you to act like a code generator and only return JSX code, nothing else. Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'MyComponent'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
 const extractJSXContent = (input: string) => {
@@ -25,6 +25,22 @@ const extractJSXContent = (input: string) => {
   const extractedContent = input.substring(contentStartIndex, endIndex);
 
   return extractedContent.trim();
+}
+
+const removeImportExportLines = (input: string) => {
+  // Split the code into lines
+  let lines = input.split('\n');
+
+  // Filter out lines that start with "import" or "export"
+  lines = lines.filter(line => !line.trim().startsWith('import') && !line.trim().startsWith('export'));
+
+  return lines.join('\n');
+}
+
+const formatResponse = (input: string) => {
+  return extractJSXContent(
+    removeImportExportLines(input)
+  );
 }
 
 const App = () => {
@@ -55,7 +71,7 @@ const App = () => {
     setCodeFinished(false);
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
-    setCode(extractJSXContent(lastBotResponse.content));
+    setCode(formatResponse(lastBotResponse.content));
   }, [messages]);
 
   useEffect(() => {
@@ -74,10 +90,10 @@ const App = () => {
             className="flex-grow p-4 text-gray-900"
             value={simpleInput}
             onChange={(e) => setSimpleInput(e.target.value)}
-            placeholder="Ask something..."
+            placeholder="A component that renders a button with the text 'Click me'"
           />
           <button type="submit" className="bg-blue-500 hover:bg-blue-700 py-2 px-4">
-            Ask GTP-3
+            Generate
           </button>
         </form>
         <div className="flex-grow p-4 bg-[#1e1e1e] overflow-auto">
