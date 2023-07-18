@@ -10,45 +10,23 @@ const createPrompt = (description: string) => {
   return `I want you to act like a code generator and only return JSX code, nothing else. Can you please provide me with a React function component? It is also very important that you don't import or export anything, otherwise the code will not work. This is because "React" is globally registered in the environment. The component should be named 'MyComponent'. What this component should do is: "${description}". Remember, I'm specifically interested in the actual code implementation (a React function component), no description. For styling you can use TailwindCSS as you can assume that the styles are present.`;
 };
 
-const extractJSXContent = (input: string) => {
-  const startTagJSX = '```jsx';
-  const startTag = '```';
-  const endTag = '```';
+const disallowed = [
+  '```',
+  '```jsx',
+  '```js',
+  'import',
+  'export',
+]
 
-  const startIndexJSX = input.indexOf(startTagJSX);
-  const startIndex = input.indexOf(startTag);
-
-  // If both tags are found, take the one that appears first
-  const actualStartIndex = startIndexJSX !== -1 ? startIndexJSX : startIndex;
-
-  const actualStartTag = actualStartIndex === startIndex ? startTag : startTagJSX;
-
-  const endIndex = input.indexOf(endTag, actualStartIndex + actualStartTag.length);
-
-  if (actualStartIndex === -1 || endIndex === -1) {
-    return input;
-  }
-
-  const contentStartIndex = actualStartIndex + actualStartTag.length;
-  const extractedContent = input.substring(contentStartIndex, endIndex);
-
-  return extractedContent.trim();
-}
-
-const removeImportExportLines = (input: string) => {
-  // Split the code into lines
-  let lines = input.split('\n');
-
-  // Filter out lines that start with "import" or "export"
-  lines = lines.filter(line => !line.trim().startsWith('import') && !line.trim().startsWith('export'));
-
-  return lines.join('\n');
+const removeDisallowedLines = (input: string) => {
+  return input
+    .split('\n')
+    .filter(line => !disallowed.some(disallowedLine => line.trim().startsWith(disallowedLine)))
+    .join('\n');
 }
 
 const formatResponse = (input: string) => {
-  return extractJSXContent(
-    removeImportExportLines(input)
-  );
+  return removeDisallowedLines(input);
 }
 
 const App = () => {
@@ -79,6 +57,7 @@ const App = () => {
     setCodeFinished(false);
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
+    console.log(lastBotResponse.content)
     setCode(formatResponse(lastBotResponse.content));
   }, [messages]);
 
