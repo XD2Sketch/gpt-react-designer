@@ -44,7 +44,6 @@ const App = () => {
   useEffect(() => {
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
     if (!lastBotResponse) return;
-    console.log('xxx')
     setCode(extractJSXContent(lastBotResponse.content));
   }, [messages]);
 
