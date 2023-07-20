@@ -29,6 +29,10 @@ Please feel free to open a PR to add feature suggestions to this list.
 
 Install dependencies with `yarn`, `npm` or `pnpm`.
 
+
+Set your OpenAI key by running the setup script `./setup.sh`. 
+Or by editing `.env.local` if you're running this code locally.
+
 Then run the development server:
 
 ```bash
@@ -39,7 +43,6 @@ yarn dev
 pnpm dev
 ```
 
-Set your OpenAI key by editing `.env.local` if you're running this code locally.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
