@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@babel/standalone": "^7.22.9",
+    "@magicul/next-google-tag-manager": "^1.0.0",
     "@monaco-editor/react": "^4.5.1",
     "@types/node": "20.4.2",
     "@types/react": "18.2.14",
