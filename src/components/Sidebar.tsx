@@ -4,6 +4,7 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { storeProject } from '@/actions/chat';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatIcon } from '@/components/icons/ChatIcon';
+import { useEffect } from 'react';
 
 export type Project = {
   id: string;
@@ -21,6 +22,14 @@ export const Sidebar = () => {
     setProjects([...projects ?? [], { id: uuid }]);
     router.push(`?project=${uuid}`);
   }
+
+  useEffect(() => {
+    if (projects?.length === 0) {
+      createNewProject();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects?.length]);
 
   return (
     <div className="max-w-[230px] w-full bg-white border p-4">
