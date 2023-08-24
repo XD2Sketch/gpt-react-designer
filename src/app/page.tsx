@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 const App = () => {
-  const [code, setCode] = useState<string>('');
+  const [code, setCode] = useState<string | undefined>('');
   const [preview, setPreview] = useState<string | null>(null);
   const [projects] = useLocalStorage<Project[]>('projects', []);
   const searchParams = useSearchParams();
@@ -17,11 +17,11 @@ const App = () => {
   const router = useRouter();
 
   const runCode = (code: string | undefined) => {
-    if (!code) return;
     setCode(code);
 
     try {
-      const transformed = transform(code, { presets: ['react'] }).code;
+      const transformed = transform(code ?? '', { presets: ['react'] }).code;
+      console.log(transformed)
       setPreview(transformed);
     } catch (err) {
       setPreview(`Error: ${err}`);
@@ -40,7 +40,7 @@ const App = () => {
       <div className="px-4 py-2 flex w-full gap-2">
         {project && (
           <>
-            <EditorChat code={code} setCode={runCode}  />
+            <EditorChat code={code ?? ''} setCode={runCode}  />
             <Preview code={preview} />
           </>
         )}

@@ -31,12 +31,12 @@ type EditorChatProps = {
   code: string;
 };
 
+const initialMessages = [
+  { id: 'code', role: 'system' as const, content: basePrompt }
+];
+
 export const EditorChat: FC<EditorChatProps> = ({ code, setCode }) => {
-  const { messages, setMessages, handleSubmit, setInput, input, isLoading } = useChat({
-    initialMessages: [
-      { id: 'code', role: 'system', content: basePrompt }
-    ]
-  });
+  const { messages, setMessages, handleSubmit, setInput, input, isLoading } = useChat({ initialMessages });
 
   const [codeFinished, setCodeFinished] = useState(false);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,7 @@ export const EditorChat: FC<EditorChatProps> = ({ code, setCode }) => {
     const storedMessages = (await getChatMessages(projectId))
       .map((message) => ({ id: message.id, content: message.content, role: message.role as any }));
 
-    setMessages([...messages, ...storedMessages]);
+    setMessages([...initialMessages, ...storedMessages]);
   };
 
   useEffect(() => {
@@ -59,6 +59,8 @@ export const EditorChat: FC<EditorChatProps> = ({ code, setCode }) => {
   useEffect(() => {
     if (!currentProject) return;
     fetchAndSetChatHistory(currentProject);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProject]);
 
   useEffect(() => {
@@ -73,8 +75,7 @@ export const EditorChat: FC<EditorChatProps> = ({ code, setCode }) => {
   useEffect(() => {
     setCodeFinished(false);
     const lastBotResponse = messages.filter((message) => message.role === 'assistant').pop();
-    if (!lastBotResponse) return;
-    setCode(formatResponse(lastBotResponse.content));
+    setCode(formatResponse(lastBotResponse?.content ?? ''));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
