@@ -39,7 +39,7 @@ export const Sidebar = () => {
         {projects?.map((project) => (
           <button
             key={project.id}
-            className={`rounded-xl bg-white hover:bg-slate-50 transition-colors px-4 py-3 w-full flex gap-3 items-center ${project.id === currentProject && 'bg-slate-100'}`}
+            className={`rounded-xl hover:bg-slate-50 transition-colors px-4 py-3 w-full flex gap-3 items-center ${project.id === currentProject ? 'bg-slate-100' : 'bg-white'}`}
             onClick={() => router.push(`?project=${project.id}`)}
           >
             <div className="w-2 mr-3">
