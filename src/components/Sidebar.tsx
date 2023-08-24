@@ -24,9 +24,7 @@ export const Sidebar = () => {
   }
 
   useEffect(() => {
-    if (projects?.length === 0) {
-      createNewProject();
-    }
+    if (projects?.length === 0) createNewProject();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects?.length]);
