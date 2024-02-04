@@ -18,7 +18,7 @@
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.7",
     "@types/uuid": "^9.0.2",
-    "ai": "^2.2.23",
+    "ai": "^2.2.33",
     "autoprefixer": "10.4.14",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.9",
